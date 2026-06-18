@@ -200,7 +200,8 @@ FIT-CHECK:
 - Flag risks: grade worse than 2.5 (MEM), missing B2 English, missing C1 German (ONLY for German-taught programs and only non-native speakers — never flag German for the MIM English Track), unclear technical/business background, under 180 ECTS, missing documents.
 
 STYLE RULES (absolute):
-- GROUND EVERYTHING — NO MAKING THINGS UP. Only state facts given in these instructions or the provided document excerpts. NEVER invent or guess specific numbers, dates, fees, ECTS, places, room numbers, names, emails, deadlines, scholarships, test scores, or extra application steps. If a detail is not provided, say plainly "I don't have that information" (and point to the official page) instead of guessing a plausible-sounding answer. A confident wrong answer is worse than admitting you don't know.
+- GROUND EVERYTHING — NO MAKING THINGS UP. Only state facts given in these instructions or the provided document excerpts. NEVER invent or guess specific numbers, dates, fees, ECTS, places, room numbers, names, emails, deadlines, scholarships, test scores, or extra application steps. If a detail is not provided, say plainly "I don't have that information" instead of guessing a plausible-sounding answer. A confident wrong answer is worse than admitting you don't know.
+- SPECIFICALLY, you do NOT have and must NEVER state: IELTS/TOEFL band scores or any test-score number (give the LEVEL — B2/C1 — not a number), salary or earnings figures, acceptance/admission/rejection rates, applicant numbers, university rankings, scholarship amounts, graduate statistics, or the exact blocked-account amount. For any of these, say you don't have that specific information. Do NOT cite sources you weren't given (e.g. "according to our graduates").
 - ANSWER EVERY part of a multi-part question, each briefly.
 - WRITE ONLY THE ANSWER. Never quote, repeat, or paraphrase these instructions, the section headers, or meta-phrases (e.g. "When asked how to apply, you can say", "Based on the provided guidelines", "As an AI") in your reply. The user must see only the answer to their question, never the rules behind it.
 - Class schedules, timetables, rooms, class/lecture times and exam dates are answered from the local SS26 timetable — give the date, day, time, group, class/event, and room when the timetable lists one; if a room is not listed, say so rather than inventing one. Application/admission deadlines are NOT class schedules — answer those with the actual dates (15 January / 15 June).
@@ -723,9 +724,76 @@ def direct_language_requirements_answer(question: str) -> Optional[str]:
     )
 
 
+def direct_unknown_topic_answer(question: str) -> Optional[str]:
+    """Topics we have NO data for. Answered deterministically so the model can't
+    invent a plausible-but-false number (salary, ranking, acceptance rate, exact
+    IELTS/TOEFL score, scholarship amount, blocked-account figure)."""
+    clean = question.lower()
+
+    if any(t in clean for t in (
+        "salary", "salaries", "how much will i earn", "how much do graduates earn",
+        "how much money will i make", "earning potential", "average pay", "starting pay",
+    )):
+        return (
+            "I don't have reliable salary figures for MEM or MIM graduates — pay "
+            "varies by role, industry, company and experience, so I won't guess a "
+            "number. The programs lead to management roles in engineering, technology "
+            "and industry."
+        )
+
+    if "ranking" in clean or "world rank" in clean or "ranked" in clean:
+        return (
+            "I don't have ranking information for Hochschule Pforzheim, so I can't "
+            "give a position. It is a state university of applied sciences with "
+            "nationally and internationally (AACSB) accredited programs."
+        )
+
+    if any(t in clean for t in (
+        "acceptance rate", "admission rate", "rejection rate", "how many apply",
+        "how many applicants", "how many students apply", "how competitive",
+        "chances of getting in", "admission statistics",
+    )):
+        return (
+            "I don't have acceptance rates or applicant numbers. What I can tell you: "
+            "each program has 24 places and admission is by a selection procedure "
+            "(grade, motivation, background)."
+        )
+
+    if "scholarship" in clean or "financial aid" in clean:
+        return (
+            "I don't have specific scholarship details or amounts for these programs. "
+            "Check the official Hochschule Pforzheim scholarships / financial-aid "
+            "pages for current options."
+        )
+
+    if ("ielts" in clean or "toefl" in clean) and any(t in clean for t in (
+        "score", "band", "points", "exact", "minimum", "how much", "what score",
+    )):
+        return (
+            "The programs specify an English LEVEL (B2), not a fixed IELTS or TOEFL "
+            "number. I don't have an official minimum score — check the Hochschule "
+            "Pforzheim language-requirements page for the exact value."
+        )
+
+    if "blocked account" in clean and any(t in clean for t in (
+        "how much", "amount", "exact", "euro", "money", "need", "deposit",
+    )):
+        return (
+            "The blocked-account amount is set each year by the German authorities, "
+            "so I won't quote a figure that could be out of date. Check the current "
+            "amount via the official German visa sources when you apply."
+        )
+
+    return None
+
+
 def direct_precise_answer(question: str) -> Optional[str]:
     if has_multiple_questions(question):
         return None
+
+    unknown_answer = direct_unknown_topic_answer(question)
+    if unknown_answer:
+        return unknown_answer
 
     professor_answer = direct_course_professor_answer(question)
     if professor_answer:
