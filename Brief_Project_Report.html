@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Brief Project Report: MEM & MIM Guide Bot</title>
+    <style>
+      body {
+        color: #111827;
+        font-family: Arial, Helvetica, sans-serif;
+        line-height: 1.5;
+        margin: 42px;
+      }
+      h1 {
+        color: #0a2857;
+        font-size: 28px;
+        margin-bottom: 22px;
+      }
+      h2 {
+        color: #254a72;
+        font-size: 18px;
+        margin-top: 24px;
+      }
+      p {
+        margin: 8px 0;
+      }
+      ul, ol {
+        margin-top: 6px;
+      }
+      li {
+        margin: 4px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Brief Project Report: MEM &amp; MIM Guide Bot</h1>
+
+    <h2>1. Project Overview</h2>
+    <p>Our project is an AI chatbot called <strong>MEM &amp; MIM Guide Bot</strong>. The purpose of the chatbot is to help students get quick and clear answers about the Master programs <strong>Engineering and Management (MEM)</strong> and <strong>Industrial Management (MIM)</strong> at Hochschule Pforzheim.</p>
+    <p>The chatbot works like a study advisor. Users can ask questions about program structure, admission requirements, deadlines, documents, language requirements, course content, and general application guidance.</p>
+
+    <h2>2. Project Objective</h2>
+    <p>The main objective was to create an interactive chatbot prototype that can:</p>
+    <ul>
+      <li>Answer common questions about MEM and MIM.</li>
+      <li>Compare both programs in a simple way.</li>
+      <li>Guide applicants through important admission and application details.</li>
+      <li>Give cautious fit-check advice without guaranteeing admission.</li>
+      <li>Provide a friendly and modern chat experience.</li>
+      <li>Demonstrate how generative AI can support student advising.</li>
+    </ul>
+
+    <h2>3. What We Built</h2>
+    <p>We built a web-based chatbot interface with a connected backend. The user can type a question, send it to the bot, and receive an answer in the chat window.</p>
+    <p>Main features include:</p>
+    <ul>
+      <li>A clean single-page chatbot website.</li>
+      <li>Suggested question buttons for quick interaction.</li>
+      <li>Chat bubbles for user and bot messages.</li>
+      <li>A program overview section for MEM and MIM.</li>
+      <li>AI-generated answers based on a controlled system prompt.</li>
+      <li>Backend API endpoint for handling chat requests.</li>
+      <li>Optional text-to-speech support using ElevenLabs.</li>
+      <li>Memory support for saving simple user corrections.</li>
+      <li>A React/Vite prototype version with an animated guide character.</li>
+      <li>A rule-based fallback chatbot for testing basic project questions.</li>
+    </ul>
+
+    <h2>4. Technologies Used</h2>
+    <p>The project uses both frontend and backend technologies.</p>
+    <p><strong>Frontend:</strong></p>
+    <ul>
+      <li>HTML, CSS, and JavaScript for the main chatbot website.</li>
+      <li>React and TypeScript for the prototype version.</li>
+      <li>Vite for frontend development.</li>
+      <li>Tailwind CSS for styling in the React version.</li>
+    </ul>
+    <p><strong>Backend:</strong></p>
+    <ul>
+      <li>Python for chatbot logic.</li>
+      <li>FastAPI for creating the web API.</li>
+      <li>Uvicorn for running the backend server.</li>
+      <li>HTTPX for calling external AI and voice APIs.</li>
+      <li>Python dotenv for loading API keys from environment variables.</li>
+    </ul>
+    <p><strong>AI and voice services:</strong></p>
+    <ul>
+      <li>OpenRouter or Groq for large language model responses.</li>
+      <li>ElevenLabs for optional text-to-speech audio.</li>
+      <li>Raphael's HS Pforzheim video recordings as an approved voice source for preparing demo voice samples.</li>
+    </ul>
+
+    <h2>5. Implementation Summary</h2>
+    <p>First, we studied the project requirements and identified the type of questions students might ask about MEM and MIM. Then we collected key information such as program duration, credits, language requirements, admission documents, deadlines, and course structure.</p>
+    <p>After that, we designed the chatbot flow. The frontend was built as a chat interface where users can type questions or click suggested prompts. The backend receives the user message through <code>/api/chat</code>, sends it to the AI model with a strict system prompt, and returns a grounded answer.</p>
+    <p>The system prompt was important because it controls the chatbot's behavior. It tells the bot to act like a friendly study advisor, only answer based on known MEM/MIM facts, avoid inventing details, and remind users to verify official requirements.</p>
+    <p>We also added optional audio support. When ElevenLabs credentials are available, the backend can convert the bot answer into speech and send audio back to the browser.</p>
+    <p>For the voice feature, Raphael suggested using his videos from the HS Pforzheim video portal as the main voice source. The planned workflow is to download MP4 files, extract the audio channel, clean the speech samples, and use them only for the educational capstone demo.</p>
+
+    <h2>6. Chatbot Knowledge Base</h2>
+    <p>The chatbot includes information about:</p>
+    <ul>
+      <li>MEM: Engineering and Management M.Sc.</li>
+      <li>MIM: Industrial Management M.Sc.</li>
+      <li>Program duration and ECTS.</li>
+      <li>Admission requirements.</li>
+      <li>Application deadlines.</li>
+      <li>Language requirements.</li>
+      <li>Important documents.</li>
+      <li>Course topics and semester structure.</li>
+      <li>Differences between MEM and MIM.</li>
+      <li>General application advice.</li>
+    </ul>
+    <p>The bot is designed to answer carefully and avoid giving final admission decisions, because only Hochschule Pforzheim can officially decide admission results.</p>
+
+    <h2>7. User Experience Design</h2>
+    <p>The interface was designed to be simple, friendly, and easy to use. The chatbot page includes a professional color theme, message bubbles, quick suggestion buttons, and a clear input area.</p>
+    <p>The React prototype also includes an animated character that follows the pointer and reacts to clicks. This was added to make the chatbot feel more interactive and engaging during the presentation.</p>
+
+    <h2>8. Testing and Improvements</h2>
+    <p>We tested the chatbot using common student questions, such as:</p>
+    <ul>
+      <li>What is MEM?</li>
+      <li>What is MIM?</li>
+      <li>What are the application deadlines?</li>
+      <li>What documents are required?</li>
+      <li>What is the difference between MEM and MIM?</li>
+      <li>Am I eligible for the program?</li>
+    </ul>
+    <p>We also created a rule-based chatbot version for simple testing without needing an external AI API. This helps demonstrate the chatbot logic even if the AI service is unavailable.</p>
+
+    <h2>9. Limitations</h2>
+    <p>The current project is a prototype, so it has some limitations:</p>
+    <ul>
+      <li>It depends on external AI APIs for advanced answers.</li>
+      <li>Voice output only works when ElevenLabs API credentials are configured.</li>
+      <li>Admission information can change, so users must verify details on the official HS Pforzheim website.</li>
+      <li>The chatbot can estimate applicant fit, but it cannot make official admission decisions.</li>
+      <li>The knowledge base is focused mainly on MEM and MIM information.</li>
+    </ul>
+
+    <h2>10. Conclusion</h2>
+    <p>The MEM &amp; MIM Guide Bot shows how an AI chatbot can support students by answering repeated program and application questions in a fast and friendly way. The project combines a modern web interface, Python backend, AI response generation, optional voice output, and structured program knowledge.</p>
+    <p>Overall, the project demonstrates how generative AI can be used in education to improve access to information and make student advising more interactive.</p>
+
+    <h2>Suggested PPT Slide Structure</h2>
+    <ol>
+      <li>Title: MEM &amp; MIM Guide Bot</li>
+      <li>Project Objective</li>
+      <li>Problem and Motivation</li>
+      <li>What We Built</li>
+      <li>Technologies Used</li>
+      <li>Chatbot Architecture</li>
+      <li>Key Features</li>
+      <li>Demo Questions</li>
+      <li>Limitations</li>
+      <li>Conclusion</li>
+    </ol>
+  </body>
+</html>

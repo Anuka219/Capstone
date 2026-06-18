@@ -1,0 +1,46 @@
+# Add official MEM/MIM source pages here, one URL per line.
+# Then run:
+#   python3 scripts/cache_knowledge_urls.py
+#
+# Examples:
+# https://www.hs-pforzheim.de/...
+
+# Official HS Pforzheim study search detail pages
+https://www.hs-pforzheim.de/studienangebot/detail/engineering-and-management-master
+https://www.hs-pforzheim.de/studienangebot/detail/industrial-management
+
+# Official Faculty of Engineering program pages
+https://techpf.hs-pforzheim.de/master/wirtschaftsingenieurwesen/engineering_and_management
+https://techpf.hs-pforzheim.de/master/industrial_management
+
+# Module handbooks and study/exam/admission documents
+https://techpf.hs-pforzheim.de/fileadmin/user_upload/uploads_redakteur_technik/07_Fakultaet/02_Qualitaet/05_Modulhandbuecher/Master_Studiengaenge_PO2024/MODULHANDBUCH_MASTER_MEM_PO_2024.pdf
+https://techpf.hs-pforzheim.de/fileadmin/user_upload/uploads_redakteur_technik/07_Fakultaet/02_Qualitaet/05_Modulhandbuecher/Master_Studiengaenge_PO2024/MODULHANDBUCH_MASTER_MIM_PO_2024.pdf
+https://techpf.hs-pforzheim.de/fileadmin/user_upload/uploads_redakteur_technik/07_Fakultaet/02_Qualitaet/07_Satzungen_Ordnungen/Masterzulassungssatzung_Technik.pdf
+https://www.hs-pforzheim.de/studium/im_studium/studien_und_pruefungsordnung
+
+# Application and timetable/course catalogue
+https://www.hs-pforzheim.de/studium/jetzt_bewerben
+https://campus.hs-pforzheim.de
+https://hic.hs-pforzheim.de/lsf
+
+# Contact and profile pages
+https://www.hs-pforzheim.de/hochschule/kontakt
+https://www.hs-pforzheim.de/profile/ansgarkuehn/
+https://www.hs-pforzheim.de/profile/uwedittmann
+https://www.hs-pforzheim.de/profile/matthiasweyer
+
+# Current MEM syllabi linked from the official MEM page
+https://techpf.hs-pforzheim.de/fileadmin/user_upload/uploads_redakteur_technik/07_Fakultaet/02_Qualitaet/06_Syllabi/Master-Studiengaenge/01_Engineering_and_Management/Sommersemester/SS2026_BAE5028_FutureMobility_Elective.pdf
+https://techpf.hs-pforzheim.de/fileadmin/user_upload/uploads_redakteur_technik/07_Fakultaet/02_Qualitaet/06_Syllabi/Master-Studiengaenge/01_Engineering_and_Management/Sommersemester/SS2026_BAE5153_Unternehmensrestrukturierung.pdf
+https://techpf.hs-pforzheim.de/fileadmin/user_upload/uploads_redakteur_technik/07_Fakultaet/02_Qualitaet/06_Syllabi/Master-Studiengaenge/01_Engineering_and_Management/Sommersemester/SS2026_MWI10008_ResearchMethods.pdf
+https://techpf.hs-pforzheim.de/fileadmin/user_upload/uploads_redakteur_technik/07_Fakultaet/02_Qualitaet/06_Syllabi/Master-Studiengaenge/01_Engineering_and_Management/Sommersemester/SS2026_MWI10009_Produktstrategie_Produktentwicklung.pdf
+https://techpf.hs-pforzheim.de/fileadmin/user_upload/uploads_redakteur_technik/07_Fakultaet/02_Qualitaet/06_Syllabi/Master-Studiengaenge/01_Engineering_and_Management/Sommersemester/SS2026_MWI10016_ManagingEmergingTechnologies.pdf
+https://techpf.hs-pforzheim.de/fileadmin/user_upload/uploads_redakteur_technik/07_Fakultaet/02_Qualitaet/06_Syllabi/Master-Studiengaenge/01_Engineering_and_Management/Sommersemester/SS2026_MWI10022_StrategicProcurement.pdf
+https://techpf.hs-pforzheim.de/fileadmin/user_upload/uploads_redakteur_technik/07_Fakultaet/02_Qualitaet/06_Syllabi/Master-Studiengaenge/01_Engineering_and_Management/Sommersemester/SS2026_MWI10028_CapstoneSeminar.pdf
+https://techpf.hs-pforzheim.de/fileadmin/user_upload/uploads_redakteur_technik/07_Fakultaet/02_Qualitaet/06_Syllabi/Master-Studiengaenge/01_Engineering_and_Management/Sommersemester/SS2026_MWI10015_ManagementByKeyPerformanceIndicators.pdf
+https://techpf.hs-pforzheim.de/fileadmin/user_upload/uploads_redakteur_technik/07_Fakultaet/02_Qualitaet/06_Syllabi/Master-Studiengaenge/01_Engineering_and_Management/Sommersemester/SS2026_MWI10014_FinancialManagementAndControl.pdf
+https://techpf.hs-pforzheim.de/fileadmin/user_upload/uploads_redakteur_technik/07_Fakultaet/02_Qualitaet/06_Syllabi/Master-Studiengaenge/01_Engineering_and_Management/Sommersemester/SS2026_MWI10069_NegotiationsB2B_Wahlfach.pdf
+
+# Current MIM-related syllabus linked from the official pages
+https://techpf.hs-pforzheim.de/fileadmin/user_upload/uploads_redakteur_technik/07_Fakultaet/02_Qualitaet/06_Syllabi/Master-Studiengaenge/02_Industrial_Management/Sommersemester/SS2026_MWI10061_GrundlagenDerIndustriellenProduktion.pdf

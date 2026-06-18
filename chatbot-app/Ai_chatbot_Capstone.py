@@ -2,7 +2,7 @@ import re
 
 
 class SimpleChatbot:
-    """Rule-based MEM capstone chatbot for terminal testing."""
+    """Rule-based MEM capstone chatbot used by the FastAPI backend."""
 
     def __init__(self, name="MEM Guide Bot"):
         self.name = name

@@ -1,0 +1,25 @@
+# Secrets — never commit
+.env
+
+# Python / virtualenvs
+.venv/
+**/venv/
+__pycache__/
+*.pyc
+
+# Node
+**/node_modules/
+
+# macOS
+.DS_Store
+
+# Large / regenerable assets (keep them local, out of git)
+models/
+tools/
+voice_source/videos/
+voice_source/audio/
+voice_source/generated/chat_responses/
+
+# temp
+*.tmp
+*.tmp.*

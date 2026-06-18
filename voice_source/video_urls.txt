@@ -1,0 +1,9 @@
+# Paste one direct MP4/download URL per line.
+# Lines starting with # are ignored.
+#
+# Public listing found these Raphael video pages, but they currently require login
+# before the real downloadable MP4 URL is visible:
+# https://video.hs-pforzheim.de/video/Wirtschaftsingenieurwesen-Intelligent-Mobility/49c41202cb7fcd1877b71702f22c7d5b
+# https://video.hs-pforzheim.de/video/Objekte-in-Einfuehrung-Informatik-VL-vom-8124-Bauernproteste/8a053c5170f1b74dc563c767bc40cb51
+#
+# After logging in through your browser, copy the real MP4/download link here.

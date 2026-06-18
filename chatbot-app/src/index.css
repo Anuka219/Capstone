@@ -1,0 +1,106 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+@keyframes avatar-run {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-2deg);
+  }
+  50% {
+    transform: translateY(-5px) rotate(2deg);
+  }
+}
+
+@keyframes avatar-pop {
+  0% {
+    transform: translateY(0) rotate(0) scale(1);
+  }
+  45% {
+    transform: translateY(-18px) rotate(-12deg) scale(1.08);
+  }
+  100% {
+    transform: translateY(0) rotate(0) scale(1);
+  }
+}
+
+@keyframes foot-left {
+  0%,
+  100% {
+    transform: translateX(0) rotate(10deg);
+  }
+  50% {
+    transform: translateX(8px) rotate(-18deg);
+  }
+}
+
+@keyframes foot-right {
+  0%,
+  100% {
+    transform: translateX(0) rotate(-10deg);
+  }
+  50% {
+    transform: translateX(-8px) rotate(18deg);
+  }
+}
+
+@keyframes spark {
+  0% {
+    opacity: 0;
+    transform: translateY(8px) scale(0.5);
+  }
+  40% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-24px) scale(1);
+  }
+}
+
+.animate-avatar-run {
+  animation: avatar-run 0.55s ease-in-out infinite;
+}
+
+.animate-avatar-pop {
+  animation: avatar-pop 0.62s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.animate-foot-left {
+  animation: foot-left 0.38s ease-in-out infinite;
+}
+
+.animate-foot-right {
+  animation: foot-right 0.38s ease-in-out infinite reverse;
+}
+
+.animate-spark-one {
+  animation: spark 0.62s ease-out forwards;
+}
+
+.animate-spark-two {
+  animation: spark 0.62s ease-out 80ms forwards;
+}
+
+.animate-spark-three {
+  animation: spark 0.62s ease-out 140ms forwards;
+}
