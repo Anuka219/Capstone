@@ -26,7 +26,10 @@ just hard-refresh the browser, no restart needed.
   knowledge retrieval, timetable + calendar.
 - `index.html` — single-page frontend served at `/`.
 - `knowledge_docs/` — facts retrieved into answers: `MEM_MIM_curated_facts.md`
-  (facts), `Semesteruebersicht_SS26.md` (SS26 timetable).
+  (facts), `Semesteruebersicht_SS26.md` (general SS26 timetable), and
+  `MIM_English_Track_Timetable_SS26.md` (room-aware MIM English Track / Varsha
+  timetable extracted from the provided PDF). `Course_Professors_SS26.md` maps
+  course names to professor / instructor names for direct "course prof" answers.
 - `bot_memory/` — learned corrections + per-session conversation memory.
 - `LOGO.png` — HS Pforzheim logo, served via `GET /LOGO.png`.
 - `.env` — secrets (NOT committed). `.env.example` lists the keys.
@@ -51,16 +54,25 @@ cloned voice can't drift into German). VOICE_ID `EV4DOTEgIuaWXU5Z948S`. On-click
 2. **MIM English Track = fully English, NO German certificate** for admission
    (only English, e.g. TOEFL/IELTS). German requirement is **C1 (not C2)**, and
    only for German-taught programs AND only for non-native German speakers;
-   native speakers / a German-taught prior degree are exempt.
+   native speakers / a German-taught prior degree are exempt. For language
+   requirement questions, define the requirements directly; do **not** append
+   "For more information..." or links to the application/language pages.
 3. **Tuition:** non-EU/EEA = **€1,500/semester**; EU/EEA & German-Abitur holders
    pay none; everyone pays a ~€150–170 semester contribution.
 4. **Schedules: the chat ANSWERS** timetable/class/exam questions from the SS26
    timetable (`direct_timetable_answer()`). The user chose this — do NOT switch
    it back to "redirect to the calendar." Application/admission deadlines are
    separate → answer with real dates (15 Jan summer / 15 June winter).
+   "My schedule", "my timetable", "what do I have", "where should I go", and
+   similar personal schedule questions default to **MIM E-Track** / the Varsha
+   timetable. Schedule answers must include date/day, time, block, class,
+   audience, and room when the timetable provides it.
 5. **Answer style:** short, scannable, spoken-first (first 2–4 sentences must
    stand alone for the voice; tables are not read aloud).
-6. **Groq-only** for the demo; **voice English-only**.
+6. **Course professor questions:** answer from `Course_Professors_SS26.md` /
+   visible timetable `Lehrperson` data. If a course is not listed, say "I don't
+   have the professor information for that course." Do not guess.
+7. **Groq-only** for the demo; **voice English-only**.
 
 ## Coordinating two AIs (important)
 - **Always re-read a file before editing** — it may have changed since your last

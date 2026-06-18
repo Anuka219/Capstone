@@ -20,6 +20,9 @@ voice_source/videos/
 voice_source/audio/
 voice_source/generated/chat_responses/
 
+# Runtime data (regenerated as the bot runs — keep out of commits)
+bot_memory/conversation_history.json
+
 # temp
 *.tmp
 *.tmp.*
