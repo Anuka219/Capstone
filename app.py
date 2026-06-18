@@ -594,6 +594,28 @@ def has_multiple_questions(question: str) -> bool:
     return False
 
 
+def direct_mcp_search_answer(question: str) -> Optional[str]:
+    match = re.match(
+        r"(?i)^\s*(?:mcp\s+search|use\s+mcp\s+to\s+search|search\s+with\s+mcp)\s*:?\s*(.+)$",
+        question.strip(),
+    )
+    if not match:
+        return None
+
+    query = match.group(1).strip()
+    if not query:
+        return "Use it like this: `mcp search MIM English Track language requirements`."
+
+    from mcp_knowledge_server import search_mem_mim_documents
+
+    result = search_mem_mim_documents(query, limit=3)
+    return (
+        "MCP knowledge search result:\n\n"
+        f"{result}\n\n"
+        "This uses the same search function exposed by `mcp_knowledge_server.py`."
+    )
+
+
 def normalize_course_text(text: str) -> str:
     text = text.lower()
     text = text.replace("&", " and ")
@@ -790,6 +812,10 @@ def direct_unknown_topic_answer(question: str) -> Optional[str]:
 def direct_precise_answer(question: str) -> Optional[str]:
     if has_multiple_questions(question):
         return None
+
+    mcp_answer = direct_mcp_search_answer(question)
+    if mcp_answer:
+        return mcp_answer
 
     unknown_answer = direct_unknown_topic_answer(question)
     if unknown_answer:

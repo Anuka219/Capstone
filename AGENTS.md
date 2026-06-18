@@ -24,6 +24,10 @@ just hard-refresh the browser, no restart needed.
 ## Architecture
 - `app.py` — FastAPI backend (the real app): SYSTEM_PROMPT, LLM calls, voice,
   knowledge retrieval, timetable + calendar.
+- `mcp_knowledge_server.py` — optional MCP server exposing the same
+  `knowledge_docs/` search as a tool. The chatbot also supports a small demo
+  command: `mcp search <topic>`, which calls the same search function without
+  making MCP required for normal answers.
 - `index.html` — single-page frontend served at `/`.
 - `knowledge_docs/` — facts retrieved into answers: `MEM_MIM_curated_facts.md`
   (facts), `Semesteruebersicht_SS26.md` (general SS26 timetable), and
