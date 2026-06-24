@@ -691,15 +691,27 @@ def direct_course_professor_answer(question: str) -> Optional[str]:
         course_coverage = len(overlap) / len(course_tokens)
         matches.append((course_coverage, len(overlap), -len(item["course"]), item))
 
-    if not matches:
-        return "I don't have the professor information for that course."
-
     matches.sort(key=lambda match: (match[0], match[1], match[2]), reverse=True)
-    best_coverage, _overlap, _neg_len, best = matches[0]
-    if best_coverage < 0.6:
-        return "I don't have the professor information for that course."
+    if matches and matches[0][0] >= 0.6:
+        best = matches[0][3]
+        return f"{best['course']} is taught by {best['instructor']}."
 
-    return f"{best['course']} is taught by {best['instructor']}."
+    # Fallback for joined spellings ("cybersecurity" -> "Cyber Security"): compare
+    # space/punctuation-stripped forms so one-word variants still match.
+    def compact(text: str) -> str:
+        return re.sub(r"[^a-z0-9]", "", text.lower())
+
+    q_compact = compact(question)
+    joined = [
+        item for item in load_course_professors()
+        if len(compact(item["course"])) >= 5 and compact(item["course"]) in q_compact
+    ]
+    if joined:
+        joined.sort(key=lambda item: len(compact(item["course"])), reverse=True)
+        best = joined[0]
+        return f"{best['course']} is taught by {best['instructor']}."
+
+    return "I don't have the professor information for that course."
 
 
 def direct_language_requirements_answer(question: str) -> Optional[str]:
