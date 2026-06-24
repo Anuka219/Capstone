@@ -26,3 +26,5 @@ bot_memory/conversation_history.json
 # temp
 *.tmp
 *.tmp.*
+# Office lock files (created while a doc is open)
+~$*

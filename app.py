@@ -207,9 +207,9 @@ STYLE RULES (absolute):
 - Class schedules, timetables, rooms, class/lecture times and exam dates are answered from the local SS26 timetable — give the date, day, time, group, class/event, and room when the timetable lists one; if a room is not listed, say so rather than inventing one. Application/admission deadlines are NOT class schedules — answer those with the actual dates (15 January / 15 June).
 - NEVER DEFLECT to a website as a substitute for answering. Answer fully first; you MAY (and for application questions SHOULD) add a clickable markdown link to the relevant official page afterwards. Exception: for language-requirement questions, do NOT add "For more information..." or links to application/language pages; just define the requirements. A one-line "confirm the latest fees/deadlines" note may follow, but the answer comes first.
 - SPOKEN-FIRST: the opening 2-4 sentences are read aloud (tables are not), so they must fully convey the answer — including the gist of any table — in plain spoken sentences. Then add a table/bullets for detail and refer to it with a COMPLETE sentence ("The full breakdown is in the table below."). Never end the spoken part on a dangling lead-in ("Here's how they compare:") and never say "read the text/answer on screen".
-- KEEP IT SHORT: spoken summary ~2-4 sentences; whole answer under ~120 words unless asked for more. No filler, no repeating the question, no pep talk.
+- KEEP IT SHORT: spoken summary ~2-4 sentences; whole answer under ~120 words unless asked for more. No filler, no repeating the question, no pep talk. Never state the same facts twice in two formats (e.g. a prose list followed by the same bullet list) — pick ONE.
 - MEM vs MIM: 2-3 spoken sentences stating the real differences (e.g. "MEM focuses on engineering management and production roles; MIM is broader — innovation, technology and general management."), then "The full breakdown is in the table below.", then a small table (Focus, Careers, Key courses, Best for).
-- Career questions: name concrete job roles in brief spoken sentences. Course questions: summarise the main courses in a spoken sentence, then the full list in bullets/table.
+- Career questions: name concrete job roles in brief spoken sentences. Course questions: open with ONE spoken sentence about the focus/structure (the theme, or how the semesters are organised) WITHOUT naming the individual courses, then list the courses ONCE in bullets/table. Never give the course list as prose AND again as bullets.
 - Do NOT invent tuition fees, application/processing fees, scholarship amounts, admission guarantees, or any number, step, or requirement not stated above. If you don't have a fact, say so plainly instead of guessing.
 - Unrelated questions: one-line answer if harmless, then steer back to MEM/MIM.
 - If the user corrects you, acknowledge briefly, apply it, and do not repeat the mistake.
@@ -455,8 +455,14 @@ def split_document_chunks(text: str, source: str, chunk_size: int = 1200) -> Lis
     return chunks
 
 
-def load_knowledge_documents() -> None:
+def load_knowledge_documents(force: bool = False) -> None:
     global knowledge_chunks
+    # Already indexed in memory? Skip the costly disk re-extraction. The MCP
+    # search (search_mem_mim_documents) calls this on every query, so without
+    # this guard every answer would re-scan all PDFs/docs. /api/reload-knowledge
+    # passes force=True to genuinely refresh from disk.
+    if knowledge_chunks and not force:
+        return
     KNOWLEDGE_DIR.mkdir(exist_ok=True)
     allowed_suffixes = {".pdf", ".docx", ".txt", ".md", ".html", ".htm", ".pptx", ".ppt"}
     chunks: List[dict] = []
@@ -494,18 +500,41 @@ def search_knowledge(query: str, limit: int = 2) -> List[dict]:
     return [chunk for _score, chunk in ranked[:limit]]
 
 
-def knowledge_context(question: str) -> str:
-    # Only the single best excerpt — keeps the per-request token cost low so we
-    # stay under Groq's per-minute limit (the system prompt already covers the
-    # core facts; this is just supplementary grounding).
-    matches = search_knowledge(question, limit=1)
-    if not matches:
-        return ""
+# Cap a grounding excerpt so the per-request token cost stays low (well under
+# Groq's per-minute limit) and the answer length is unchanged. "Scrape" only the
+# most relevant slice of a document, not the whole thing.
+KNOWLEDGE_EXCERPT_CHARS = 900
 
-    lines = ["Relevant excerpts from local project documents. Prefer these when answering precise factual questions:"]
-    for index, chunk in enumerate(matches, 1):
-        lines.append(f"[Source {index}: {chunk['source']}]\n{chunk['text']}")
-    return "\n\n".join(lines)
+
+def knowledge_context(question: str) -> str:
+    # Ground answers through our MCP knowledge tool (search_mem_mim_documents) —
+    # the same tool exposed by mcp_knowledge_server.py — but only the single most
+    # relevant excerpt, trimmed, so tokens and answer length stay the same. If
+    # the MCP tool is unavailable, fall back to the local search over the same
+    # data so grounding never silently breaks during the demo.
+    result = ""
+    try:
+        from mcp_knowledge_server import search_mem_mim_documents
+
+        result = search_mem_mim_documents(question, limit=1)
+    except Exception as exc:  # noqa: BLE001 - never let grounding crash an answer
+        print(f"MCP grounding unavailable, using local search: {exc}")
+        result = ""
+
+    if not result or result.startswith(("No relevant", "Please provide")):
+        matches = search_knowledge(question, limit=1)
+        if not matches:
+            return ""
+        chunk = matches[0]
+        result = f"Source 1: {chunk['source']}\n{chunk['text']}"
+
+    if len(result) > KNOWLEDGE_EXCERPT_CHARS:
+        result = result[:KNOWLEDGE_EXCERPT_CHARS].rsplit(" ", 1)[0] + " …"
+
+    return (
+        "Relevant excerpt from our MCP knowledge tool (search_mem_mim_documents). "
+        "Prefer it for precise factual questions:\n\n" + result
+    )
 
 
 def contact_answer() -> str:
@@ -1429,7 +1458,7 @@ async def lessons() -> dict:
 @app.post("/api/reload-knowledge")
 async def reload_knowledge() -> dict:
     """Reload local PDF/DOCX/TXT/MD/HTML files from knowledge_docs."""
-    load_knowledge_documents()
+    load_knowledge_documents(force=True)
     return {
         "ok": True,
         "knowledge_documents": len({chunk["source"] for chunk in knowledge_chunks}),

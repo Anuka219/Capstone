@@ -1731,7 +1731,44 @@
         window.speechSynthesis.speak(utt);
       }
 
-      function attachSpeakerButton(textNode, options = {}) {
+      // Play (or toggle-stop) the professor voice for one message bubble.
+      // Shared by the speaker-button click and the auto-play on new answers.
+      async function playVoiceFor(button, textNode, options, { toggle = true } = {}) {
+        const fallbackText = options.fallbackText || textNode.textContent.trim();
+
+        // Pressing the active button again -> stop (toggle off).
+        if (toggle && currentVoiceButton === button) {
+          stopCurrentAudio();
+          return;
+        }
+
+        stopCurrentAudio();
+        currentVoiceButton = button;
+        setAvatarState("flying");
+
+        // Already generated (prefetch finished)? Play instantly.
+        if (options.audioBase64) {
+          setVoiceButtonState(button, "playing");
+          playAudioFromBase64(options.audioBase64, options.audioMime, fallbackText, button);
+          return;
+        }
+
+        // Otherwise wait for the (possibly already-running) generation.
+        setVoiceButtonState(button, "loading");
+        try {
+          await requestVoiceInto(options, fallbackText);
+          if (currentVoiceButton !== button) return; // user stopped / switched
+          setVoiceButtonState(button, "playing");
+          playAudioFromBase64(options.audioBase64 || "", options.audioMime, fallbackText, button);
+        } catch (err) {
+          if (currentVoiceButton !== button) return;
+          // Real failure (server/XTTS issue): read the actual answer text with
+          // the browser voice so the content is still correct.
+          speakWithBrowser(fallbackText, button);
+        }
+      }
+
+      function attachSpeakerButton(textNode, options = {}, autoplay = false) {
         const bubble = textNode.parentElement;
         if (!bubble || bubble.querySelector(".voice-button")) return;
 
@@ -1740,43 +1777,21 @@
         button.className = "voice-button";
         setVoiceButtonState(button, "idle");
 
-        button.addEventListener("click", async () => {
-          const fallbackText = options.fallbackText || textNode.textContent.trim();
-
-          // Click the active button again -> stop (toggle off).
-          if (currentVoiceButton === button) {
-            stopCurrentAudio();
-            return;
-          }
-
-          stopCurrentAudio();
-          currentVoiceButton = button;
-          setAvatarState("flying");
-
-          // Already generated (prefetch finished)? Play instantly.
-          if (options.audioBase64) {
-            setVoiceButtonState(button, "playing");
-            playAudioFromBase64(options.audioBase64, options.audioMime, fallbackText, button);
-            return;
-          }
-
-          // Otherwise wait for the (possibly already-running) generation.
-          setVoiceButtonState(button, "loading");
-          try {
-            await requestVoiceInto(options, fallbackText);
-            if (currentVoiceButton !== button) return; // user stopped / switched
-            setVoiceButtonState(button, "playing");
-            playAudioFromBase64(options.audioBase64 || "", options.audioMime, fallbackText, button);
-          } catch (err) {
-            if (currentVoiceButton !== button) return;
-            // Real failure (server/XTTS issue): read the actual answer text with
-            // the browser voice so the content is still correct.
-            speakWithBrowser(fallbackText, button);
-          }
+        button.addEventListener("click", () => {
+          playVoiceFor(button, textNode, options);
         });
 
         const time = bubble.querySelector(".time");
         bubble.insertBefore(button, time);
+
+        // Auto-start speaking the moment an answer arrives; the button stays
+        // visible as a Stop / Replay control. Some browsers block autoplay
+        // until the page has been interacted with — if so, playVoiceFor falls
+        // back to the browser voice and the user can still press the button.
+        if (autoplay) {
+          playVoiceFor(button, textNode, options, { toggle: false });
+        }
+        return button;
       }
 
       function playAudioFromBase64(audioBase64, audioMime, fallbackText, button) {
@@ -1868,12 +1883,15 @@
           const data = await requestBotReply(question);
           const textNode = createMessageBubble("bot");
           renderFormattedText(textNode, data.text);
-          attachSpeakerButton(textNode, {
-            audioBase64: data.audio_base64,
-            audioMime: data.audio_mime,
-            fallbackText: data.text,
-          });
-          setAvatarState("resting");
+          attachSpeakerButton(
+            textNode,
+            {
+              audioBase64: data.audio_base64,
+              audioMime: data.audio_mime,
+              fallbackText: data.text,
+            },
+            true // auto-speak the answer; button becomes a Stop/Replay control
+          );
         } catch (error) {
           addMessage(
             "I'm getting a lot of questions right now and hit a brief limit. Please wait a few seconds and ask again. 🙏",
@@ -1904,7 +1922,6 @@
           "Check my course match",
         ],
         enrolled: [
-          "Open my class calendar",
           "Explain my MIM courses",
           "Who do I contact about my course?",
           "Compare MEM and MIM",
