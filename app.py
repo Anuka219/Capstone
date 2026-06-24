@@ -500,41 +500,19 @@ def search_knowledge(query: str, limit: int = 2) -> List[dict]:
     return [chunk for _score, chunk in ranked[:limit]]
 
 
-# Cap a grounding excerpt so the per-request token cost stays low (well under
-# Groq's per-minute limit) and the answer length is unchanged. "Scrape" only the
-# most relevant slice of a document, not the whole thing.
-KNOWLEDGE_EXCERPT_CHARS = 900
-
-
 def knowledge_context(question: str) -> str:
-    # Ground answers through our MCP knowledge tool (search_mem_mim_documents) —
-    # the same tool exposed by mcp_knowledge_server.py — but only the single most
-    # relevant excerpt, trimmed, so tokens and answer length stay the same. If
-    # the MCP tool is unavailable, fall back to the local search over the same
-    # data so grounding never silently breaks during the demo.
-    result = ""
-    try:
-        from mcp_knowledge_server import search_mem_mim_documents
+    # Only the single best excerpt — keeps the per-request token cost low so we
+    # stay under Groq's per-minute limit (the system prompt already covers the
+    # core facts; this is just supplementary grounding). Plain local search —
+    # no MCP on the answer path.
+    matches = search_knowledge(question, limit=1)
+    if not matches:
+        return ""
 
-        result = search_mem_mim_documents(question, limit=1)
-    except Exception as exc:  # noqa: BLE001 - never let grounding crash an answer
-        print(f"MCP grounding unavailable, using local search: {exc}")
-        result = ""
-
-    if not result or result.startswith(("No relevant", "Please provide")):
-        matches = search_knowledge(question, limit=1)
-        if not matches:
-            return ""
-        chunk = matches[0]
-        result = f"Source 1: {chunk['source']}\n{chunk['text']}"
-
-    if len(result) > KNOWLEDGE_EXCERPT_CHARS:
-        result = result[:KNOWLEDGE_EXCERPT_CHARS].rsplit(" ", 1)[0] + " …"
-
-    return (
-        "Relevant excerpt from our MCP knowledge tool (search_mem_mim_documents). "
-        "Prefer it for precise factual questions:\n\n" + result
-    )
+    lines = ["Relevant excerpts from local project documents. Prefer these when answering precise factual questions:"]
+    for index, chunk in enumerate(matches, 1):
+        lines.append(f"[Source {index}: {chunk['source']}]\n{chunk['text']}")
+    return "\n\n".join(lines)
 
 
 def contact_answer() -> str:
