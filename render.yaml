@@ -1,0 +1,30 @@
+# Render deployment blueprint for the MEM & MIM Guide Bot.
+#
+# Deploy:  Render dashboard -> New + -> Blueprint -> connect this repo.
+# Render reads this file, then prompts you for the two secret API keys
+# (the ones marked `sync: false`). Paste them from your local Capstone/.env.
+services:
+  - type: web
+    name: mem-mim-guide-bot
+    runtime: python
+    plan: free
+    region: frankfurt
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app:app --host 0.0.0.0 --port $PORT
+    envVars:
+      # --- non-secret config (safe to keep here) ---
+      - key: VOICE_PROVIDER
+        value: elevenlabs
+      - key: GROQ_MODEL
+        value: llama-3.1-8b-instant
+      - key: ELEVENLABS_VOICE_ID
+        value: EV4DOTEgIuaWXU5Z948S
+      - key: ELEVENLABS_MODEL_ID
+        value: eleven_turbo_v2_5
+      - key: ELEVENLABS_LANGUAGE
+        value: en
+      # --- secrets: Render will ask you to paste these (never stored in git) ---
+      - key: GROQ_API_KEY
+        sync: false
+      - key: ELEVENLABS_API_KEY
+        sync: false
