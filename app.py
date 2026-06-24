@@ -676,24 +676,29 @@ def direct_course_professor_answer(question: str) -> Optional[str]:
     if not question_tokens:
         return "Which course do you mean? Ask for example: 'Who is the professor for Future Mobility?'"
 
-    # Match only when EVERY course word the user named is actually present in a
-    # real course (subset match). This stops "Process Management" silently
-    # matching "Process Analytics" on the shared word "process" — a confidently
-    # wrong answer. If the exact course isn't in our data, say so honestly.
+    # Score by how much of the COURSE NAME the user actually named. Requiring most
+    # of it (>=0.6) stops "Process Management" matching "Process Analytics" (only
+    # "process" overlaps = 0.5), while tolerating extra or mistyped words in the
+    # question ("Capstone couse" still matches "Capstone" = 1.0).
     matches = []
     for item in load_course_professors():
         course_tokens = course_lookup_tokens(item["course"])
-        if not course_tokens or not question_tokens.issubset(course_tokens):
+        if not course_tokens:
             continue
-        specificity = len(question_tokens) / len(course_tokens)
-        matches.append((specificity, item))
+        overlap = question_tokens & course_tokens
+        if not overlap:
+            continue
+        course_coverage = len(overlap) / len(course_tokens)
+        matches.append((course_coverage, len(overlap), -len(item["course"]), item))
 
     if not matches:
         return "I don't have the professor information for that course."
 
-    # Prefer the course the query pins down most specifically.
-    matches.sort(key=lambda match: match[0], reverse=True)
-    best = matches[0][1]
+    matches.sort(key=lambda match: (match[0], match[1], match[2]), reverse=True)
+    best_coverage, _overlap, _neg_len, best = matches[0]
+    if best_coverage < 0.6:
+        return "I don't have the professor information for that course."
+
     return f"{best['course']} is taught by {best['instructor']}."
 
 
