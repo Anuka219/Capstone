@@ -676,23 +676,24 @@ def direct_course_professor_answer(question: str) -> Optional[str]:
     if not question_tokens:
         return "Which course do you mean? Ask for example: 'Who is the professor for Future Mobility?'"
 
+    # Match only when EVERY course word the user named is actually present in a
+    # real course (subset match). This stops "Process Management" silently
+    # matching "Process Analytics" on the shared word "process" — a confidently
+    # wrong answer. If the exact course isn't in our data, say so honestly.
     matches = []
     for item in load_course_professors():
         course_tokens = course_lookup_tokens(item["course"])
-        overlap = question_tokens & course_tokens
-        if not overlap:
+        if not course_tokens or not question_tokens.issubset(course_tokens):
             continue
-        score = len(overlap) / max(len(course_tokens), 1)
-        matches.append((score, len(overlap), item))
+        specificity = len(question_tokens) / len(course_tokens)
+        matches.append((specificity, item))
 
     if not matches:
         return "I don't have the professor information for that course."
 
-    matches.sort(key=lambda match: (match[0], match[1], len(match[2]["course"])), reverse=True)
-    best_score, _overlap, best = matches[0]
-    if best_score < 0.45:
-        return "I don't have the professor information for that course."
-
+    # Prefer the course the query pins down most specifically.
+    matches.sort(key=lambda match: match[0], reverse=True)
+    best = matches[0][1]
     return f"{best['course']} is taught by {best['instructor']}."
 
 
@@ -816,6 +817,44 @@ def direct_unknown_topic_answer(question: str) -> Optional[str]:
     return None
 
 
+def direct_admission_requirements_answer(question: str) -> Optional[str]:
+    """Fixed, correct admission/requirements answer so the 8B LLM can't drop the
+    MIM English Track 'no German' carve-out or invent certificates."""
+    clean = question.lower()
+    asks_admission = (
+        ("international" in clean and "requirement" in clean)
+        or "admission requirement" in clean
+        or "entry requirement" in clean
+        or "requirements to apply" in clean
+        or "what do i need to apply" in clean
+        or "required documents" in clean
+        or "documents required" in clean
+        or "what documents do i need" in clean
+    )
+    if not asks_admission:
+        return None
+
+    return (
+        "Here are the admission requirements for MEM & MIM:\n\n"
+        "- Degree: a recognized bachelor's in a relevant engineering / "
+        "industrial-engineering field (checked via uni-assist).\n"
+        "- English: B2 level (TOEFL or IELTS).\n"
+        "- German: required ONLY for German-taught programs, and only if you are "
+        "not a native German speaker and your previous degree was not taught in "
+        "German — then C1 (DSH-2, TestDaF TDN 4x4, or telc C1 Hochschule). "
+        "The MIM English Track needs NO German.\n"
+        "- Documents: CV, university entrance qualification, first-degree "
+        "transcript, motivation letter, recommendation, references, and the "
+        "language certificates above.\n"
+        "- Non-EU (for the visa): admission letter, blocked-account proof, health "
+        "insurance; some countries (e.g. India, China, Vietnam) also need an APS "
+        "certificate.\n\n"
+        "Deadlines: 15 January (summer) / 15 June (winter). HS Pforzheim makes the "
+        "final decision.\n\n"
+        "[Master application page](https://www.hs-pforzheim.de/en/studies/study_programs/application_master)"
+    )
+
+
 def direct_precise_answer(question: str) -> Optional[str]:
     if has_multiple_questions(question):
         return None
@@ -839,6 +878,10 @@ def direct_precise_answer(question: str) -> Optional[str]:
     fit_answer = direct_fit_check_answer(question)
     if fit_answer:
         return fit_answer
+
+    admission_answer = direct_admission_requirements_answer(question)
+    if admission_answer:
+        return admission_answer
 
     timetable_answer = direct_timetable_answer(question)
     if timetable_answer:
