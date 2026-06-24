@@ -636,6 +636,10 @@ def course_lookup_tokens(text: str) -> set[str]:
         "who", "what", "which", "prof", "professor", "teacher", "lecturer",
         "instructor", "lehrperson", "teaches", "teach", "teaching", "course",
         "class", "for", "the", "is", "are", "my", "of", "and", "please",
+        # filler verbs/question words so coverage reflects the real course name
+        "takes", "take", "taking", "took", "responsible", "does", "did",
+        "tell", "give", "name", "named", "about", "this", "that", "you",
+        "module", "subject", "where", "when", "how", "the",
     }
     return {
         token
@@ -674,27 +678,43 @@ def handbook_responsible_professor(question: str) -> Optional[str]:
         text = chunk["text"]
         if "modulverantwort" not in text.lower():
             continue
-        for module in re.findall(r"„\s*([^„“”\"]{3,60}?)\s*[“”\"]", text):
+        for nm in re.finditer(r"„\s*([^„“”\"]{3,60}?)\s*[“”\"]", text):
+            module = nm.group(1).strip()
             module_tokens = course_lookup_tokens(module)
             if not module_tokens:
                 continue
-            coverage = len(question_tokens & module_tokens) / len(module_tokens)
+            overlap = question_tokens & module_tokens
+            coverage_c = len(overlap) / len(module_tokens)
+            coverage_q = len(overlap) / len(question_tokens)
             module_compact = re.sub(r"[^a-z0-9]", "", module.lower())
-            if not (coverage >= 0.6 or (len(module_compact) >= 5 and module_compact in q_compact)):
+            # Joined-spelling match only for MULTI-word names (cyber+security),
+            # never single words — else "leadership" matches "virtualleadership".
+            joined_hit = (
+                len(module_tokens) >= 2
+                and len(module_compact) >= 6
+                and module_compact in q_compact
+            )
+            # Require the user to name most of the module AND most of what they
+            # typed to be in that module, so "virtual leadership" does NOT match
+            # plain "Leadership". A full joined-spelling hit also qualifies.
+            if not (joined_hit or (coverage_c >= 0.6 and coverage_q >= 0.6)):
                 continue
+            # Read the responsible prof from THIS module's own section (from its
+            # name onward) so it can't bleed from a neighbouring module.
+            section = text[nm.start():]
             match = re.search(
                 r"Modulverantwortliche[rn]?\s+(.+?)\s+"
                 r"(?:Lehrende|Zuordnung|Kennziffer|Empfohlene|Pr[üu]fung|Studiensemester|Voraussetzung)",
-                text,
+                section,
             )
             if match:
                 prof = match.group(1).strip()
                 if 0 < len(prof) <= 60:
-                    candidates.append((coverage, module.strip(), prof))
+                    candidates.append((max(coverage_c, coverage_q), module, prof))
     if not candidates:
         return None
     candidates.sort(key=lambda item: item[0], reverse=True)
-    _cov, module, prof = candidates[0]
+    _score, module, prof = candidates[0]
     return f"{module} — responsible professor: {prof} (from the module handbook)."
 
 
@@ -742,7 +762,9 @@ def direct_course_professor_answer(question: str) -> Optional[str]:
     q_compact = compact(question)
     joined = [
         item for item in load_course_professors()
-        if len(compact(item["course"])) >= 5 and compact(item["course"]) in q_compact
+        if len(course_lookup_tokens(item["course"])) >= 2
+        and len(compact(item["course"])) >= 6
+        and compact(item["course"]) in q_compact
     ]
     if joined:
         joined.sort(key=lambda item: len(compact(item["course"])), reverse=True)
