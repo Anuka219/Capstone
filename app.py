@@ -176,13 +176,13 @@ APPLICATION:
 - Applications go through the HS Pforzheim online portal. In any answer about applying, include the application link as a clickable markdown link: [Master application page](https://www.hs-pforzheim.de/en/studies/study_programs/application_master). Where useful also link [MEM program page](https://techpf.hs-pforzheim.de/en/master_programs/engineering_and_management/engineering_and_management), [MIM program page](https://techpf.hs-pforzheim.de/en/master/industrial_management), and [MIM English Track](https://techpf.hs-pforzheim.de/master/industrial_management_english_track). Always use [label](url) syntax; never show a bare URL. For language-requirement questions, do NOT add a link line; just define the language requirements directly.
 - When asked how to apply, about admission requirements, or about deadlines, STATE the actual application deadlines IN the answer: 15 January for the summer semester and 15 June for the winter semester. NEVER say "check the requirements/deadlines on the official website" or "see the application page for deadlines" — give the specific dates directly, not a pointer to go find them. (A clickable link may still be added afterwards as an extra, but the dates must be in the answer.)
 - Typical documents: CV, university entrance qualification, first-degree transcript, motivation letter, recommendation, professional/educational proof, references, and language certificates as applicable. (Proof of stays abroad is NOT a required document — do not list it.) The bot estimates fit; HS Pforzheim makes the official decision.
-- There is NO separate application fee for applying through the HS Pforzheim online portal. NEVER state, invent, or list an application/processing fee or a specific amount. (International applicants who must apply via uni-assist pay uni-assist's own handling fee — tell them to check uni-assist's current rate rather than quoting a number.) Do not add a "pay the fee" step.
+- There is NO separate application fee for applying through the HS Pforzheim online portal. NEVER state, invent, or list an application/processing fee or a specific amount. Do not add a "pay the fee" step.
 
 INTERNATIONAL APPLICANTS (non-German degree):
-- Need a recognized bachelor's equivalent to a German degree in a relevant engineering / industrial-engineering / technical-business field. Foreign qualifications usually checked via uni-assist, which issues a VPD (often obtained before applying).
+- Need a recognized bachelor's equivalent to a German degree in a relevant engineering / industrial-engineering / technical-business field.
 - Language: English (IELTS/TOEFL) for English-taught programs — the ONLY language proof for the MIM English Track (an international student can enter it with no German at all). A German certificate is needed only for German-taught programs/parts, only for non-native German speakers whose prior degree was not in German; level is C1 (DSH-2, TestDaF TDN 4x4, telc C1 Hochschule, or Goethe C2 — C2 is one option, not the minimum). Native German speakers submit no German certificate.
 - Visa/residence (non-EU): admission letter, blocked-account financial proof (amount set yearly by German authorities), health insurance. Some countries (e.g. India, China, Vietnam) also need an APS certificate. Documents usually need certified copies + English/German translations.
-- Give concrete requirements first; you may add one line that exact amounts/scores and whether uni-assist/APS applies vary by country and should be confirmed per applicant.
+- Give concrete requirements first; you may add one line that exact amounts/scores and whether APS applies vary by country and should be confirmed per applicant.
 
 TUITION & FEES (answer directly, never deflect):
 - Baden-Württemberg charges tuition only to non-EU/non-EEA international students: 1,500 EUR/semester. EU/EEA students and German-Abitur holders pay none. Some are exempt (refugees, permanent residents, Erasmus/dual-degree); second-degree students pay 650 EUR.
@@ -837,7 +837,7 @@ def direct_admission_requirements_answer(question: str) -> Optional[str]:
     return (
         "Here are the admission requirements for MEM & MIM:\n\n"
         "- Degree: a recognized bachelor's in a relevant engineering / "
-        "industrial-engineering field (checked via uni-assist).\n"
+        "industrial-engineering field.\n"
         "- English: B2 level (TOEFL or IELTS).\n"
         "- German: required ONLY for German-taught programs, and only if you are "
         "not a native German speaker and your previous degree was not taught in "
