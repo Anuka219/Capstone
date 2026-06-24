@@ -1342,19 +1342,37 @@ def direct_timetable_answer(question: str) -> Optional[str]:
     if any(term in clean for term in ("application", "admission", "apply", "applying", "enrol", "enroll")):
         return None
 
+    # Strong terms clearly about a schedule — fire on their own.
     phrase_terms = (
         "timetable", "time table", "schedule", "my class", "my classes",
         "my lecture", "my exam", "what do i have", "what's on", "whats on",
         "what is on", "which room", "what room", "room number", "class time",
-        "where should i go", "where do i go", "this week", "next week",
-        "tomorrow", "today", "tonight",
+        "where should i go", "where do i go",
     )
     has_phrase = any(term in clean for term in phrase_terms)
     has_weekday = extract_question_weekday(question) is not None
     has_exam = re.search(r"\bexams?\b", clean) is not None
-    has_date = extract_question_date(question) is not None
+    # Only an EXPLICIT date counts here (e.g. "24 June 2026" / "2026-06-24").
+    # Relative words ("today"/"tomorrow") are handled by the gated temporal check
+    # below, so "what's the weather today?" doesn't trigger the timetable.
+    has_explicit_date = bool(
+        re.search(r"\b20\d{2}-\d{1,2}-\d{1,2}\b", clean)
+        or re.search(r"\b\d{1,2}(?:st|nd|rd|th|\.)?\s+[a-zäöüß]+\s+20\d{2}\b", clean)
+    )
 
-    if not (has_phrase or has_weekday or has_exam or has_date):
+    # Temporal words ("today", "tomorrow", "this week"...) only mean "schedule"
+    # when paired with a class/room/lecture word or a weekday — otherwise a
+    # question like "what's the weather today?" would wrongly dump the timetable.
+    temporal_terms = ("today", "tonight", "tomorrow", "this week", "next week")
+    schedule_words = (
+        "class", "classes", "lecture", "lectures", "schedule", "timetable",
+        "room", "exam", "exams", "course", "courses", "lesson", "lessons",
+    )
+    has_temporal = any(term in clean for term in temporal_terms) and (
+        any(word in clean for word in schedule_words) or has_weekday
+    )
+
+    if not (has_phrase or has_weekday or has_exam or has_explicit_date or has_temporal):
         return None
 
     rows = parse_timetable_rows()
