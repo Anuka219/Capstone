@@ -660,6 +660,44 @@ def load_course_professors() -> List[dict]:
     return professors
 
 
+def handbook_responsible_professor(question: str) -> Optional[str]:
+    """Fallback when a course isn't in the curated professor file: read the
+    module's responsible professor (Modulverantwortlicher) straight from the
+    indexed module handbook, so the bot uses the full knowledge base instead of
+    just the small curated list."""
+    question_tokens = course_lookup_tokens(question)
+    if not question_tokens:
+        return None
+    q_compact = re.sub(r"[^a-z0-9]", "", question.lower())
+    candidates = []
+    for chunk in knowledge_chunks:
+        text = chunk["text"]
+        if "modulverantwort" not in text.lower():
+            continue
+        for module in re.findall(r"„\s*([^„“”\"]{3,60}?)\s*[“”\"]", text):
+            module_tokens = course_lookup_tokens(module)
+            if not module_tokens:
+                continue
+            coverage = len(question_tokens & module_tokens) / len(module_tokens)
+            module_compact = re.sub(r"[^a-z0-9]", "", module.lower())
+            if not (coverage >= 0.6 or (len(module_compact) >= 5 and module_compact in q_compact)):
+                continue
+            match = re.search(
+                r"Modulverantwortliche[rn]?\s+(.+?)\s+"
+                r"(?:Lehrende|Zuordnung|Kennziffer|Empfohlene|Pr[üu]fung|Studiensemester|Voraussetzung)",
+                text,
+            )
+            if match:
+                prof = match.group(1).strip()
+                if 0 < len(prof) <= 60:
+                    candidates.append((coverage, module.strip(), prof))
+    if not candidates:
+        return None
+    candidates.sort(key=lambda item: item[0], reverse=True)
+    _cov, module, prof = candidates[0]
+    return f"{module} — responsible professor: {prof} (from the module handbook)."
+
+
 def direct_course_professor_answer(question: str) -> Optional[str]:
     clean = question.lower()
     asks_prof = any(
@@ -710,6 +748,11 @@ def direct_course_professor_answer(question: str) -> Optional[str]:
         joined.sort(key=lambda item: len(compact(item["course"])), reverse=True)
         best = joined[0]
         return f"{best['course']} is taught by {best['instructor']}."
+
+    # Not in the curated list — try the full module handbook before giving up.
+    handbook = handbook_responsible_professor(question)
+    if handbook:
+        return handbook
 
     return "I don't have the professor information for that course."
 
