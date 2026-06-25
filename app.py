@@ -87,7 +87,7 @@ GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
 GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.0-flash")
 
 ELEVENLABS_API_KEY = os.getenv("ELEVENLABS_API_KEY", "")
-ELEVENLABS_VOICE_ID = os.getenv("ELEVENLABS_VOICE_ID") or "21m00Tcm4TlvDq8ikWAM"
+ELEVENLABS_VOICE_ID = os.getenv("ELEVENLABS_VOICE_ID") or "EV4DOTEgIuaWXU5Z948S"
 ELEVENLABS_MODEL_ID = os.getenv("ELEVENLABS_MODEL_ID") or "eleven_turbo_v2_5"
 # Lock the spoken language so the cloned (German) voice can't auto-switch to
 # German mid-answer. Only turbo_v2_5 / flash_v2_5 / v3 honor language_code;
@@ -101,7 +101,12 @@ ELEVENLABS_LANGUAGE_LOCK_MODELS = {
 ELEVENLABS_OUTPUT_FORMAT = os.getenv("ELEVENLABS_OUTPUT_FORMAT") or "mp3_44100_128"
 AUDIO_MIME = "audio/mpeg"
 PROFESSOR_DEMO_AUDIO_FILE = os.getenv("PROFESSOR_DEMO_AUDIO_FILE", "")
-VOICE_PROVIDER = (os.getenv("VOICE_PROVIDER") or "browser").lower()
+# Default to ElevenLabs (the cloned professor voice) whenever a key is present,
+# so a hosted deploy that only sets ELEVENLABS_API_KEY still uses it instead of
+# the robotic browser fallback. Set VOICE_PROVIDER explicitly to override.
+VOICE_PROVIDER = (
+    os.getenv("VOICE_PROVIDER") or ("elevenlabs" if ELEVENLABS_API_KEY else "browser")
+).lower()
 XTTS_SPEAKER_WAV = os.getenv(
     "XTTS_SPEAKER_WAV",
     "voice_source/instant_voice_clone_clips/raphael_10s_45min.mp3",
